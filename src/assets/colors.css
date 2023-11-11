@@ -1,3 +1,9 @@
 :root {
+    --white: #fff;
     --main-bg: #fdfdfd;
+    --main-components: #e9ecef;
+    --main-border: #DEDEDD;
+
+    --text-thin: #76787D;
+    --text-bold: #333;
 }
