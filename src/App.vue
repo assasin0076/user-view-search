@@ -6,12 +6,15 @@
   const filteredUsers = ref([]);
   const selectedUser = ref();
   const searchValue = ref('');
+  const searchStubText = ref('Начните поиск');
+  const isError = ref(false);
 
   const selectUser = (id) => {
     selectedUser.value = users.value.find((user) => user.id === id);
   };
 
   const searchUsers = throttle(() => {
+    searchStubText.value = 'Ничего не найдено';
     selectedUser.value = null;
     const parts = searchValue.value
       .split(',')
@@ -44,10 +47,17 @@
   }, 200);
 
   onBeforeMount(async () => {
-    const response = await fetch('https://jsonplaceholder.typicode.com/users');
-    const json = await response.json();
-    users.value = json;
-    filteredUsers.value = json;
+    await fetch('https://jsonplaceholder.typicode.com/users')
+      .then(async (response) => {
+        isError.value = false;
+        const json = await response.json();
+        users.value = json;
+        filteredUsers.value = json;
+      })
+      .catch((e) => {
+        isError.value = true;
+        searchStubText.value = `Произошла ошибка: ${e}`;
+      });
   });
 </script>
 
@@ -67,8 +77,8 @@
           @input="searchUsers"
         />
         <h2 class="header-text">Результаты</h2>
-        <div v-if="users.length === 0" class="thin-text mt-10">
-          ничего не найдено
+        <div v-if="filteredUsers.length === 0" class="thin-text mt-10">
+          {{ searchStubText }}
         </div>
         <div class="results-container" v-else>
           <div
