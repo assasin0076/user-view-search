@@ -1,4 +1,26 @@
-<script setup></script>
+<script setup>
+  import { ref } from 'vue';
+
+  const users = ref([
+    {
+      id: 1,
+      img: './assets/image-stub-big.jpg',
+      name: 'Bret1',
+      email: 'Sincere@april.biz',
+    },
+    {
+      id: 2,
+      img: './assets/image-stub-big.jpg',
+      name: 'Bret2',
+      email: 'Sincere@april.biz',
+    },
+  ]);
+  const selectedUser = ref();
+
+  const selectUser = (id) => {
+    selectedUser.value = users.value.find((user) => user.id === id);
+  };
+</script>
 
 <template>
   <div class="main-page">
@@ -10,45 +32,42 @@
       <div class="search-section">
         <h2 class="header-text mb-14">Поиск сотрудников</h2>
         <input class="search-input" placeholder="Antonette, Bret" />
-        <h2 class="header-text mb-18">Результаты</h2>
-        <div class="result-item">
-          <img
-            class="result-image"
-            src="./assets/image-stub-small.jpg"
-            alt="#"
-          />
-          <div class="result-item-description">
-            <div class="bold-text mb-5">Bret</div>
-            <div class="thin-text">Sincere@april.biz</div>
-          </div>
+        <h2 class="header-text">Результаты</h2>
+        <div v-if="users.length === 0" class="thin-text mt-10">
+          ничего не найдено
         </div>
-        <div class="result-item result-item__selected">
-          <img
-            class="result-image"
-            src="./assets/image-stub-small.jpg"
-            alt="#"
-          />
-          <div class="result-item-description">
-            <div class="bold-text mb-5">Bret</div>
-            <div class="thin-text">Sincere@april.biz</div>
+        <div v-else>
+          <div
+            v-for="user in users"
+            :key="user.id"
+            class="result-item"
+            :class="{ 'result-item__selected': user.id === selectedUser?.id }"
+            @click="selectUser(user.id)"
+          >
+            <img
+              class="result-image"
+              src="./assets/image-stub-small.jpg"
+              alt="#"
+            />
+            <div class="result-item-description">
+              <div class="bold-text mb-5">{{ user.name }}</div>
+              <div class="thin-text">{{ user.email }}</div>
+            </div>
           </div>
         </div>
       </div>
-      <div class="profile-section-empty-stub" v-if="false">
-        Выберите сотрудника, чтобы посмотреть его профиль
-      </div>
-      <div class="profile-section" v-else>
+      <div class="profile-section" v-if="selectedUser">
         <img
           class="profile-section-image"
           src="./assets/image-stub-big.jpg"
           alt="#"
         />
         <div class="profile-section-stats">
-          <div class="header-text mb-10">Ervin Howell</div>
+          <div class="header-text mb-10">{{ selectedUser.name }}</div>
           <div class="stat-group mb-10">
             <div class="bold-text">email:</div>
             <div class="designer-dolboyob">&nbsp;&nbsp;</div>
-            <div class="thin-text">Shanna@melissa.tv</div>
+            <div class="thin-text">{{ selectedUser.email }}</div>
           </div>
           <div class="stat-group mb-20">
             <div class="bold-text">phone:</div>
@@ -67,12 +86,17 @@
           </div>
         </div>
       </div>
+      <div class="profile-section-empty-stub" v-else>
+        Выберите сотрудника, чтобы посмотреть его профиль
+      </div>
     </main>
   </div>
 </template>
 
 <style scoped lang="scss">
   .main-page {
+    padding: 50px;
+
     .mb-5 {
       margin-bottom: 5px;
     }
@@ -91,7 +115,9 @@
     .mb-25 {
       margin-bottom: 25px;
     }
-    padding: 50px;
+    .mt-10 {
+      margin-top: 10px;
+    }
 
     h2 {
       margin: 0;
@@ -156,9 +182,20 @@
           border-radius: 10px;
           box-shadow: 0 0 10px 0 rgba(0, 0, 0, 0.1);
           cursor: pointer;
+          border: 1px solid transparent;
+          transition:
+            border 0.2s,
+            background-color 0.2s;
+          &:hover {
+            background-color: var(--main-border);
+          }
 
           &:not(:last-child) {
             margin-bottom: 18px;
+          }
+
+          &:first-child {
+            margin-top: 18px;
           }
 
           .result-image {
@@ -175,9 +212,7 @@
           &.result-item__selected {
             border: 1px solid var(--main-border);
             cursor: default;
-            .result-item-description {
-              background-color: var(--main-border);
-            }
+            background-color: var(--main-border);
           }
         }
       }
