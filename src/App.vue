@@ -1,5 +1,5 @@
 <script setup>
-  import { ref } from 'vue';
+  import { onBeforeMount, ref } from 'vue';
 
   const users = ref([
     {
@@ -20,6 +20,12 @@
   const selectUser = (id) => {
     selectedUser.value = users.value.find((user) => user.id === id);
   };
+
+  onBeforeMount(async () => {
+    const response = await fetch('https://jsonplaceholder.typicode.com/users');
+    users.value = await response.json();
+    console.log(users.value);
+  });
 </script>
 
 <template>
@@ -72,7 +78,7 @@
           <div class="stat-group mb-20">
             <div class="bold-text">phone:</div>
             <div class="designer-dolboyob">&nbsp;&nbsp;</div>
-            <div class="thin-text">010-692-6593 x09125</div>
+            <div class="thin-text">{{ selectedUser.phone }}</div>
           </div>
           <div class="header-text mb-25">О себе:</div>
           <div class="thin-text">
