@@ -1,30 +1,53 @@
 <script setup>
   import { onBeforeMount, ref } from 'vue';
+  import throttle from '@/helpers/throttle';
 
-  const users = ref([
-    {
-      id: 1,
-      img: './assets/image-stub-big.jpg',
-      name: 'Bret1',
-      email: 'Sincere@april.biz',
-    },
-    {
-      id: 2,
-      img: './assets/image-stub-big.jpg',
-      name: 'Bret2',
-      email: 'Sincere@april.biz',
-    },
-  ]);
+  const users = ref([]);
+  const filteredUsers = ref([]);
   const selectedUser = ref();
+  const searchValue = ref('');
 
   const selectUser = (id) => {
     selectedUser.value = users.value.find((user) => user.id === id);
   };
 
+  const searchUsers = throttle(() => {
+    selectedUser.value = null;
+    const parts = searchValue.value
+      .split(',')
+      .filter((part) => String(part).length > 0)
+      .map((part) => {
+        if (!part.length) return part;
+        return isNaN(part) ? part : parseInt(part);
+      })
+      .reduce((acc, part) => {
+        if (typeof part === 'string') {
+          return [...acc, { type: 'name', value: part }];
+        }
+        if (typeof part === 'number') {
+          return [...acc, { type: 'id', value: part }];
+        }
+      }, []);
+    if (!parts.length) {
+      filteredUsers.value = users.value;
+      return;
+    }
+    filteredUsers.value = users.value.filter((user) => {
+      return parts.some((part) => {
+        if (part.type === 'id') {
+          return user.id === part.value;
+        } else {
+          return user.name === part.value;
+        }
+      });
+    });
+  }, 200);
+
   onBeforeMount(async () => {
     const response = await fetch('https://jsonplaceholder.typicode.com/users');
-    users.value = await response.json();
-    console.log(users.value);
+    const json = await response.json();
+    users.value = json;
+    filteredUsers.value = json;
   });
 </script>
 
@@ -37,14 +60,19 @@
     <main class="content-block">
       <div class="search-section">
         <h2 class="header-text mb-14">Поиск сотрудников</h2>
-        <input class="search-input" placeholder="Antonette, Bret" />
+        <input
+          v-model="searchValue"
+          class="search-input"
+          placeholder="Antonette, Bret"
+          @input="searchUsers"
+        />
         <h2 class="header-text">Результаты</h2>
         <div v-if="users.length === 0" class="thin-text mt-10">
           ничего не найдено
         </div>
         <div v-else>
           <div
-            v-for="user in users"
+            v-for="user in filteredUsers"
             :key="user.id"
             class="result-item"
             :class="{ 'result-item__selected': user.id === selectedUser?.id }"
@@ -56,8 +84,8 @@
               alt="#"
             />
             <div class="result-item-description">
-              <div class="bold-text mb-5">{{ user.name }}</div>
-              <div class="thin-text">{{ user.email }}</div>
+              <div class="bold-text result-item-name">{{ user.name }}</div>
+              <div class="thin-text result-item-email">{{ user.email }}</div>
             </div>
           </div>
         </div>
@@ -192,6 +220,7 @@
           transition:
             border 0.2s,
             background-color 0.2s;
+
           &:hover {
             background-color: var(--main-border);
           }
@@ -213,6 +242,19 @@
           .result-item-description {
             width: 100%;
             padding: 15px;
+            max-width: 177px;
+
+            .result-item-name {
+              text-overflow: ellipsis;
+              overflow: hidden;
+              white-space: nowrap;
+              margin-bottom: 5px;
+            }
+            .result-item-email {
+              text-overflow: ellipsis;
+              overflow: hidden;
+              white-space: nowrap;
+            }
           }
 
           &.result-item__selected {
