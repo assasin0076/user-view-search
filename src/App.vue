@@ -70,7 +70,7 @@
         <div v-if="users.length === 0" class="thin-text mt-10">
           ничего не найдено
         </div>
-        <div v-else>
+        <div class="results-container" v-else>
           <div
             v-for="user in filteredUsers"
             :key="user.id"
@@ -130,6 +130,10 @@
 <style scoped lang="scss">
   .main-page {
     padding: 50px;
+    height: 100vh;
+    max-height: 100vh;
+    display: flex;
+    flex-direction: column;
 
     .mb-5 {
       margin-bottom: 5px;
@@ -187,15 +191,23 @@
     }
 
     .content-block {
+      height: auto;
       background-color: var(--main-bg);
       filter: drop-shadow(0px 0px 10px rgba(0, 0, 0, 0.1));
       border-radius: 10px;
       display: grid;
       grid-template-columns: 290px auto;
+      flex-grow: 1;
+      max-height: 100%;
+      overflow: hidden;
 
       .search-section {
         padding: 24px 20px;
         border-right: 1px solid var(--main-border);
+        display: flex;
+        flex-direction: column;
+        flex: 1;
+        overflow: hidden;
 
         .search-input {
           color: #76787d;
@@ -211,56 +223,83 @@
           margin-bottom: 30px;
         }
 
-        .result-item {
+        .results-container {
+          flex: 1;
+          overflow: hidden;
+          overflow-y: auto;
+          max-height: 100%;
           display: flex;
-          border-radius: 10px;
-          box-shadow: 0 0 10px 0 rgba(0, 0, 0, 0.1);
-          cursor: pointer;
-          border: 1px solid transparent;
-          transition:
-            border 0.2s,
-            background-color 0.2s;
-
-          &:hover {
-            background-color: var(--main-border);
+          flex-direction: column;
+          &::-webkit-scrollbar {
+            width: 26px;
+            border-radius: 13px;
+            background-clip: padding-box;
+            border: 10px solid transparent;
           }
-
-          &:not(:last-child) {
-            margin-bottom: 18px;
+          &::-webkit-scrollbar-track {
+            background-color: transparent;
           }
-
-          &:first-child {
-            margin-top: 18px;
+          &::-webkit-scrollbar-thumb {
+            width: 26px;
+            border-radius: 13px;
+            background-clip: padding-box;
+            border: 10px solid transparent;
+            color: var(--main-border);
           }
-
-          .result-image {
-            border-right: 1px solid var(--main-border);
-            border-radius: 10px 0 0 10px;
-            width: 70px;
-            height: 70px;
+          &::-webkit-scrollbar-thumb {
+            box-shadow: inset 0 0 0 10px;
           }
-          .result-item-description {
-            width: 100%;
-            padding: 15px;
-            max-width: 177px;
+          .result-item {
+            display: flex;
+            border-radius: 10px;
+            box-shadow: 0 0 10px 0 rgba(0, 0, 0, 0.1);
+            cursor: pointer;
+            border: 1px solid transparent;
+            transition:
+              border 0.2s,
+              background-color 0.2s;
 
-            .result-item-name {
-              text-overflow: ellipsis;
-              overflow: hidden;
-              white-space: nowrap;
-              margin-bottom: 5px;
+            &:hover {
+              background-color: var(--main-border);
             }
-            .result-item-email {
-              text-overflow: ellipsis;
-              overflow: hidden;
-              white-space: nowrap;
-            }
-          }
 
-          &.result-item__selected {
-            border: 1px solid var(--main-border);
-            cursor: default;
-            background-color: var(--main-border);
+            &:not(:last-child) {
+              margin-bottom: 18px;
+            }
+
+            &:first-child {
+              margin-top: 18px;
+            }
+
+            .result-image {
+              border-right: 1px solid var(--main-border);
+              border-radius: 10px 0 0 10px;
+              width: 70px;
+              height: 70px;
+            }
+            .result-item-description {
+              width: 100%;
+              padding: 15px;
+              overflow: hidden;
+
+              .result-item-name {
+                text-overflow: ellipsis;
+                overflow: hidden;
+                white-space: nowrap;
+                margin-bottom: 5px;
+              }
+              .result-item-email {
+                text-overflow: ellipsis;
+                overflow: hidden;
+                white-space: nowrap;
+              }
+            }
+
+            &.result-item__selected {
+              border: 1px solid var(--main-border);
+              cursor: default;
+              background-color: var(--main-border);
+            }
           }
         }
       }
